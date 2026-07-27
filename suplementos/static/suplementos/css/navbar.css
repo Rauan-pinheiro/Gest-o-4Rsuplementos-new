@@ -1,12 +1,92 @@
-/* configurações gerais */
-* {
+/* Variáveis */
+:root {
+    --bg-navbar: rgba(18, 18, 18, 0.95); /* Fundo escuro moderno */
+    --cor-texto-logo: #ffffff;
+    --cor-destaque: #ff3333;              /* Vermelho vivo esportivo */
+    --cor-link: #b3b3b3;                  /* Cinza elegante para leitura */
+    --cor-link-hover: #ffffff;            /* Acende no hover */
+    --font-nav: 'Inter', sans-serif;       /* Fonte moderna recomendada */
+}
+
+/* Estrutura Principal da Barra */
+.main-navbar {
+    background-color: var(--bg-navbar);
+    backdrop-filter: blur(10px);          /* Efeito de vidro fosco premium */
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;                     /* Fixa no topo ao rolar a página */
+    top: 0;
+    z-index: 1000;
+    font-family: var(--font-nav);
+}
+
+/* Container de Alinhamento (Slim) */
+.navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.8rem 2rem;                 /* Padding reduzido para efeito Slim */
+    display: flex;
+    justify-content: space-between;       /* Logo na esquerda, Menu na direita */
+    align-items: center;
+}
+
+/* Estilização da Logo */
+.logo a {
+    text-decoration: none;
+}
+
+.logo h1 {
+    color: var(--cor-texto-logo);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
     margin: 0;
+}
+
+.destaque-vermelho {
+    color: var(--cor-destaque);
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.3); /* Brilho sutil na logo */
+}
+
+/* Menu de Páginas (Links) */
+.pages {
+    display: flex;
+    list-style: none;
     padding: 0;
+    margin: 0;
+    gap: 1.5rem;                          /* Espaço perfeito entre links */
 }
 
-
-/* NAVBAR */
-.destaque-vermelho{
-    color: red;
+.pages a {
+    text-decoration: none;
+    color: var(--cor-link);
+    font-weight: 500;
+    font-size: 0.95rem;                   /* Fonte ligeiramente menor e mais limpa */
+    padding: 0.5rem 0;
+    position: relative;                   /* Base para a linha animada */
+    transition: color 0.2s ease;
 }
 
+/* Efeito Hover Inteligente */
+.pages a:hover {
+    color: var(--cor-link-hover);
+}
+
+/* Linha Indicadora Animada embaixo do link */
+.pages a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--cor-destaque);
+    transform-origin: bottom right;
+    transition: transform 0.25s ease-out;
+}
+
+.pages a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}

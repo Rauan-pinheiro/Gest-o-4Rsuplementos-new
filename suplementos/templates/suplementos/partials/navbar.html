@@ -3,21 +3,22 @@
 <link rel="stylesheet" href="{% static 'suplementos/css/navbar.css' %}">
 
 
-<nav>
+<nav class="main-navbar">
 
-    <div class='navbar'>
+    <div class="navbar-container">
 
-        <a href="">
-            <h1>
-                <span class="destaque-vermelho">4R</span> SUPLEMENTOS⚡
-            </h1>
-        </a>
-        <p>SISTEMA DE GESTÃO</p>
-        
+        <!-- LADO ESQUERDO: LOGO -->
+        <div class="logo">
+            <a href="{% url 'dashboard' %}">
+                <h1><span class="destaque-vermelho">4R</span> SUPLEMENTOS⚡</h1>
+            </a>
+        </div>
+
+        <!-- LADO DIREITO: LINKS -->
         <ul class="pages">
             <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
             <li><a href="{% url 'historico' %}">Histórico</a></li>
-            <li><a href="{% url 'inadimplentes'%}">Inadimplentes</a></li>
+            <li><a href="{% url 'inadimplentes' %}">Inadimplentes</a></li>
             <li><a href="{% url 'orcamento' %}">Orçamento</a></li>
             <li><a href="{% url 'produtos' %}">Produtos</a></li>
             <li><a href="{% url 'promocoes' %}">Promoções</a></li>
