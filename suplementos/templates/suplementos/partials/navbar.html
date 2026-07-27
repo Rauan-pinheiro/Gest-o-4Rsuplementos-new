@@ -7,13 +7,24 @@
 
     <div class='navbar'>
 
-        <h1>
-            <span class="destaque-vermelho">4R</span> SUPLEMENTOS⚡
-        </h1>
-
+        <a href="">
+            <h1>
+                <span class="destaque-vermelho">4R</span> SUPLEMENTOS⚡
+            </h1>
+        </a>
         <p>SISTEMA DE GESTÃO</p>
         
-        
-    </div>
+        <ul class="pages">
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li><a href="{% url 'historico' %}">Histórico</a></li>
+            <li><a href="{% url 'inadimplentes'%}">Inadimplentes</a></li>
+            <li><a href="{% url 'orcamento' %}">Orçamento</a></li>
+            <li><a href="{% url 'produtos' %}">Produtos</a></li>
+            <li><a href="{% url 'promocoes' %}">Promoções</a></li>
+            <li><a href="{% url 'validades' %}">Validades</a></li>
+            <li><a href="{% url 'vendas' %}">Vendas</a></li>
+        </ul>
 
+    </div>
+    
 </nav>
