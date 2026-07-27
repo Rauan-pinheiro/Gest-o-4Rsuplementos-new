@@ -1,6 +1,3 @@
-from django.db import models
-
-# Create your models here.
 
 from django.db import models
 
@@ -43,10 +40,12 @@ class Produto(models.Model):
         verbose_name='Local de Armazenamento'
     )
     
-    # Propriedade para calcular a margem de lucro automaticamente (Venda - Compra)
+    # Propriedade para calcular a margem de lucro automaticamente
     @property
-    def margem(self):
-        return self.p_venda - self.p_compra
+    def margem_lucro(self):
+        if self.p_compra == 0:
+            return 0
+        return ((self.p_venda - self.p_compra) / self.p_compra) * 100
 
     # Exibe o nome do produto ao listar no painel Admin
     def __str__(self):
@@ -55,3 +54,6 @@ class Produto(models.Model):
     class Meta:
         verbose_name = "Produto"
         verbose_name_plural = "Produtos"
+
+class FormaPagamento(models.Model):
+    pass
