@@ -1,0 +1,64 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Comparar preços — {{ categoria.nome }} — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Comparação de preços — {{ categoria.nome }}</h1>
+        <p class="subtitulo">Todos os produtos desta categoria, agrupados por marca</p>
+    </div>
+    <form method="get" action="" style="margin:0;">
+        <select name="categoria" id="troca-categoria" onchange="location.href=this.value">
+            {% for c in categorias %}
+                <option value="{% url 'produtos_comparar' c.id %}" {% if c.id == categoria.id %}selected{% endif %}>{{ c.nome }}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div class="grid grid-3" style="margin-bottom:1.5rem;">
+    <div class="stat-tile">
+        <span class="rotulo">Menor preço</span>
+        <span class="valor positivo">R$ {{ resumo.menor|default:"0.00"|floatformat:2 }}</span>
+    </div>
+    <div class="stat-tile">
+        <span class="rotulo">Preço médio</span>
+        <span class="valor">R$ {{ resumo.medio|default:"0.00"|floatformat:2 }}</span>
+    </div>
+    <div class="stat-tile">
+        <span class="rotulo">Maior preço</span>
+        <span class="valor critico">R$ {{ resumo.maior|default:"0.00"|floatformat:2 }}</span>
+    </div>
+</div>
+
+{% for marca, produtos in marcas.items %}
+<div class="card" style="margin-bottom:1.25rem;">
+    <h3>{{ marca }}</h3>
+    <div class="tabela-wrap">
+        <table>
+            <thead>
+                <tr><th>Produto</th><th>Variação</th><th>Local</th><th>Estoque</th><th>Preço</th></tr>
+            </thead>
+            <tbody>
+                {% for p in produtos %}
+                <tr>
+                    <td data-rotulo="Produto">{{ p.nome_produto }}</td>
+                    <td data-rotulo="Variação">{{ p.variacao|default:"—" }}</td>
+                    <td data-rotulo="Local">{{ p.local.nome_local|default:"—" }}</td>
+                    <td data-rotulo="Estoque">{{ p.quantidade }}</td>
+                    <td data-rotulo="Preço" class="mono">
+                        R$ {{ p.p_venda }}
+                        {% if p.p_venda == resumo.menor %}<span class="badge badge-ok">Menor preço</span>{% endif %}
+                        {% if p.p_venda == resumo.maior %}<span class="badge badge-esgotado">Maior preço</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% empty %}
+<p class="vazio">Nenhum produto cadastrado nesta categoria ainda.</p>
+{% endfor %}
+{% endblock %}

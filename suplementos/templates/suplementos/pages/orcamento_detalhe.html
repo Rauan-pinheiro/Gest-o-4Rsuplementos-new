@@ -1,0 +1,74 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Orçamento #{{ orcamento.id }} — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Orçamento #{{ orcamento.id }}</h1>
+    <a href="{% url 'orcamento_lista' %}" class="btn btn-outline">← Voltar</a>
+</div>
+
+<div class="grid grid-2" style="align-items:start;gap:1.5rem;">
+    <div class="card">
+        <h3>Dados</h3>
+        <p><strong>Cliente:</strong> {{ orcamento.nome_cliente|default:"—" }}</p>
+        <p><strong>Data:</strong> {{ orcamento.data }}</p>
+        <p><strong>Válido até:</strong> {{ orcamento.validade_orcamento|default:"—" }}</p>
+        <p><strong>Status:</strong>
+            <span class="badge {% if orcamento.status == 'CONVERTIDO' %}badge-ok{% elif orcamento.status == 'EXPIRADO' %}badge-esgotado{% else %}badge-neutro{% endif %}">
+                {{ orcamento.get_status_display }}
+            </span>
+        </p>
+        {% if orcamento.observacoes %}<p><strong>Observações:</strong> {{ orcamento.observacoes }}</p>{% endif %}
+
+        {% if orcamento.status == 'ABERTO' %}
+        <form method="post" action="{% url 'orcamento_converter' orcamento.id %}">
+            {% csrf_token %}
+            <h3 style="margin-top:1.5rem;">Converter em venda</h3>
+            <div class="campo">
+                <label for="local">Local</label>
+                <select name="local" id="local">
+                    <option value="">—</option>
+                    {% for l in locais %}<option value="{{ l.id }}">{{ l.nome_local }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="campo">
+                <label for="forma_pagamento">Forma de pagamento</label>
+                <select name="forma_pagamento" id="forma_pagamento">
+                    <option value="DINHEIRO">Dinheiro</option>
+                    <option value="PIX">Pix</option>
+                    <option value="CARTAO">Cartão</option>
+                    <option value="FIADO">Fiado</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Converter em venda</button>
+        </form>
+        {% elif orcamento.venda_gerada %}
+            <a href="{% url 'venda_detalhe' orcamento.venda_gerada.id %}" class="btn btn-outline btn-block">Ver venda gerada (#{{ orcamento.venda_gerada.id }})</a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Itens</h3>
+        <div class="tabela-wrap">
+            <table>
+                <thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead>
+                <tbody>
+                    {% for item in orcamento.itens.all %}
+                    <tr>
+                        <td data-rotulo="Produto">{{ item.nome_produto_snapshot }}</td>
+                        <td data-rotulo="Qtd">{{ item.quantidade }}</td>
+                        <td data-rotulo="Preço" class="mono">R$ {{ item.preco_unit_venda }}</td>
+                        <td data-rotulo="Subtotal" class="mono">R$ {{ item.subtotal_venda|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="page-header" style="margin-top:1rem;margin-bottom:0;">
+            <span class="texto-secundario">Total</span>
+            <strong style="font-size:1.4rem;">R$ {{ orcamento.total|floatformat:2 }}</strong>
+        </div>
+    </div>
+</div>
+{% endblock %}

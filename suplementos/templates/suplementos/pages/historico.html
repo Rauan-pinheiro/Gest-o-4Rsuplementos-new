@@ -1,0 +1,75 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Histórico de vendas — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Histórico de vendas</h1>
+    <a href="{% url 'vendas' %}" class="btn btn-primary">+ Nova venda</a>
+</div>
+
+<form method="get" class="toolbar card">
+    <div class="campo">
+        <label for="cliente">Cliente</label>
+        <select name="cliente" id="cliente">
+            <option value="">Todos</option>
+            {% for c in clientes %}
+                <option value="{{ c.id }}" {% if filtros.cliente == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="campo">
+        <label for="forma_pagamento">Pagamento</label>
+        <select name="forma_pagamento" id="forma_pagamento">
+            <option value="">Todos</option>
+            {% for valor, rotulo in forma_pagamento_choices %}
+                <option value="{{ valor }}" {% if filtros.forma_pagamento == valor %}selected{% endif %}>{{ rotulo }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="campo">
+        <label for="data_inicio">De</label>
+        <input type="date" name="data_inicio" id="data_inicio" value="{{ filtros.data_inicio|default:'' }}">
+    </div>
+    <div class="campo">
+        <label for="data_fim">Até</label>
+        <input type="date" name="data_fim" id="data_fim" value="{{ filtros.data_fim|default:'' }}">
+    </div>
+    <button type="submit" class="btn btn-outline">Filtrar</button>
+    <a href="{% url 'historico' %}" class="btn btn-outline">Limpar</a>
+</form>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>#</th><th>Data</th><th>Cliente</th><th>Local</th><th>Pagamento</th><th>Total</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for v in vendas %}
+            <tr>
+                <td data-rotulo="#">{{ v.id }}</td>
+                <td data-rotulo="Data">{{ v.data }}</td>
+                <td data-rotulo="Cliente"><a href="{% url 'cliente_detalhe' v.cliente.id %}">{{ v.cliente.nome }}</a></td>
+                <td data-rotulo="Local">{{ v.local.nome_local|default:"—" }}</td>
+                <td data-rotulo="Pagamento">{{ v.get_forma_pagamento_display }}</td>
+                <td data-rotulo="Total" class="mono">R$ {{ v.total|floatformat:2 }}</td>
+                <td data-rotulo="Status">
+                    {% if v.pago %}<span class="badge badge-ok">Pago</span>{% else %}<span class="badge badge-baixo">Em aberto</span>{% endif %}
+                </td>
+                <td><a href="{% url 'venda_detalhe' v.id %}" class="btn btn-sm btn-outline">Ver</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="vazio">Nenhuma venda registrada ainda.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div class="toolbar" style="margin-top:1.25rem;">
+    {% if page_obj.has_previous %}<a class="btn btn-sm btn-outline" href="?page={{ page_obj.previous_page_number }}">← Anterior</a>{% endif %}
+    <span class="texto-secundario">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="btn btn-sm btn-outline" href="?page={{ page_obj.next_page_number }}">Próxima →</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

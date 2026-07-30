@@ -1,0 +1,54 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar — 4R Suplementos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'suplementos/css/base.css' %}">
+    <style>
+        body.login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, #1a1a1a 0%, #0d0d0d 65%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        .login-card h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+        .login-card .destaque { text-shadow: 0 0 12px rgba(255, 51, 51, 0.35); }
+        .login-card p.subtitulo { margin-bottom: 2rem; font-size: 0.85rem; }
+        .login-card form { text-align: left; }
+    </style>
+</head>
+<body class="login-page">
+    <div class="card login-card">
+        <h1><span class="destaque">4R</span> SUPLEMENTOS⚡</h1>
+        <p class="subtitulo">Acesso restrito — sistema de gestão interno</p>
+
+        {% if form.errors %}
+            <div class="alerta alerta-error">Usuário ou senha inválidos.</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="campo">
+                <label for="id_username">Usuário</label>
+                <input type="text" name="username" id="id_username" autofocus required>
+            </div>
+            <div class="campo">
+                <label for="id_password">Senha</label>
+                <input type="password" name="password" id="id_password" required>
+            </div>
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        </form>
+    </div>
+</body>
+</html>

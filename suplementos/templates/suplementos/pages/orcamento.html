@@ -1,0 +1,66 @@
+{% extends "suplementos/base.html" %}
+{% load static %}
+
+{% block title %}Novo orçamento — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Gerar orçamento</h1>
+    <a href="{% url 'orcamento_lista' %}" class="btn btn-outline">Ver orçamentos</a>
+</div>
+
+{{ produtos_json|json_script:"produtos-data" }}
+
+<form method="post" id="carrinho-form" class="grid grid-2" style="align-items:start;gap:1.5rem;">
+    {% csrf_token %}
+    <input type="hidden" name="itens_json" id="itens_json" value="[]">
+
+    <div class="card">
+        <h3>Dados do orçamento</h3>
+        <div class="campo">
+            <label for="cliente_nome">Cliente (opcional)</label>
+            <input type="text" name="cliente_nome" id="cliente_nome" list="lista-clientes" placeholder="Nome do cliente">
+            <datalist id="lista-clientes">
+                {% for c in clientes %}<option value="{{ c.nome }}">{% endfor %}
+            </datalist>
+        </div>
+        <div class="campo">
+            <label for="validade_orcamento">Válido até</label>
+            <input type="date" name="validade_orcamento" id="validade_orcamento" value="{{ validade_padrao }}">
+        </div>
+        <div class="campo">
+            <label for="observacoes">Observações</label>
+            <textarea name="observacoes" id="observacoes" rows="2"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Gerar orçamento</button>
+    </div>
+
+    <div class="card">
+        <h3>Produtos</h3>
+        <div class="campo busca-produto-wrap">
+            <label for="produto-busca">Buscar produto no estoque</label>
+            <input type="search" id="produto-busca" placeholder="Digite o nome, marca ou variação..." autocomplete="off">
+            <div id="produto-sugestoes" class="produto-sugestoes"></div>
+        </div>
+
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                    <tr><th>Produto</th><th>Qtd</th><th>Preço unit.</th><th>Subtotal</th><th></th></tr>
+                </thead>
+                <tbody id="carrinho-corpo"></tbody>
+            </table>
+        </div>
+
+        <div class="page-header" style="margin-top:1rem;margin-bottom:0;">
+            <span class="texto-secundario">Total</span>
+            <strong id="carrinho-total" style="font-size:1.4rem;">R$ 0,00</strong>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'suplementos/js/carrinho.js' %}"></script>
+{% endblock %}

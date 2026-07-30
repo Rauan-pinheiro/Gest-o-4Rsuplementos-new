@@ -1,0 +1,43 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}{{ cliente.nome }} — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ cliente.nome }}</h1>
+    <a href="{% url 'historico' %}" class="btn btn-outline">← Voltar</a>
+</div>
+
+<div class="grid grid-2" style="margin-bottom:1.5rem;">
+    <div class="stat-tile">
+        <span class="rotulo">Total gasto (histórico)</span>
+        <span class="valor positivo">R$ {{ total_gasto|floatformat:2 }}</span>
+    </div>
+    <div class="stat-tile">
+        <span class="rotulo">Em aberto (fiado)</span>
+        <span class="valor {% if em_aberto %}critico{% endif %}">R$ {{ em_aberto|floatformat:2 }}</span>
+    </div>
+</div>
+
+<div class="tabela-wrap">
+    <table>
+        <thead><tr><th>#</th><th>Data</th><th>Pagamento</th><th>Total</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            {% for v in vendas %}
+            <tr>
+                <td data-rotulo="#">{{ v.id }}</td>
+                <td data-rotulo="Data">{{ v.data }}</td>
+                <td data-rotulo="Pagamento">{{ v.get_forma_pagamento_display }}</td>
+                <td data-rotulo="Total" class="mono">R$ {{ v.total|floatformat:2 }}</td>
+                <td data-rotulo="Status">
+                    {% if v.pago %}<span class="badge badge-ok">Pago</span>{% else %}<span class="badge badge-baixo">Em aberto</span>{% endif %}
+                </td>
+                <td><a href="{% url 'venda_detalhe' v.id %}" class="btn btn-sm btn-outline">Ver</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="vazio">Nenhuma compra registrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Excluir produto — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:480px;">
+    <h2>Excluir produto?</h2>
+    <p>Tem certeza que deseja excluir <strong>{{ object }}</strong>? Essa ação não pode ser desfeita.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Sim, excluir</button>
+            <a href="{% url 'produtos' %}" class="btn btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}{% if object %}Editar produto{% else %}Novo produto{% endif %} — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% if object %}Editar produto{% else %}Novo produto{% endif %}</h1>
+    <a href="{% url 'produtos' %}" class="btn btn-outline">← Voltar para produtos</a>
+</div>
+
+<div class="card" style="max-width:720px;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="grid grid-2">
+            <div class="campo">
+                <label for="{{ form.nome_produto.id_for_label }}">Nome do produto</label>
+                {{ form.nome_produto }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.marca.id_for_label }}">Marca</label>
+                {{ form.marca }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.variacao.id_for_label }}">Variação (sabor / tamanho / refil)</label>
+                {{ form.variacao }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.categoria.id_for_label }}">Categoria</label>
+                {{ form.categoria }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.local.id_for_label }}">Local de armazenamento</label>
+                {{ form.local }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.imagem.id_for_label }}">Imagem</label>
+                {{ form.imagem }}
+                {% if object.imagem %}
+                    <img src="{{ object.imagem.url }}" class="tabela-produto-img" style="margin-top:0.5rem;width:64px;height:64px;" alt="">
+                {% endif %}
+            </div>
+            <div class="campo">
+                <label for="{{ form.quantidade.id_for_label }}">Quantidade em estoque</label>
+                {{ form.quantidade }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.quantidade_minima.id_for_label }}">Quantidade mínima (alerta)</label>
+                {{ form.quantidade_minima }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.p_compra.id_for_label }}">Preço de compra (custo)</label>
+                {{ form.p_compra }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.p_venda.id_for_label }}">Preço de venda</label>
+                {{ form.p_venda }}
+                <span class="texto-fraco" id="sugestao-preco" style="display:block;margin-top:0.35rem;font-size:0.8rem;"></span>
+            </div>
+            <div class="campo">
+                <label for="{{ form.validade.id_for_label }}">Data de validade</label>
+                {{ form.validade }}
+            </div>
+        </div>
+
+        <div class="campo">
+            <label for="{{ form.obs.id_for_label }}">Observações</label>
+            {{ form.obs }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Salvar produto</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ margens_por_categoria|json_script:"margens-data" }}
+<script>
+    (function () {
+        var margens = JSON.parse(document.getElementById('margens-data').textContent);
+        var categoriaEl = document.getElementById('{{ form.categoria.id_for_label }}');
+        var compraEl = document.getElementById('{{ form.p_compra.id_for_label }}');
+        var vendaEl = document.getElementById('{{ form.p_venda.id_for_label }}');
+        var sugestaoEl = document.getElementById('sugestao-preco');
+
+        function calcularSugestao() {
+            var margem = margens[categoriaEl.value];
+            var custo = parseFloat(compraEl.value);
+            if (!margem || isNaN(custo)) {
+                sugestaoEl.textContent = '';
+                return;
+            }
+            var sugerido = (custo * (1 + parseFloat(margem) / 100)).toFixed(2);
+            sugestaoEl.innerHTML = 'Sugestão (margem ' + margem + '%): R$ ' + sugerido +
+                ' — <a href="#" id="usar-sugestao">usar este valor</a>';
+            var link = document.getElementById('usar-sugestao');
+            if (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    vendaEl.value = sugerido;
+                });
+            }
+        }
+
+        if (categoriaEl && compraEl && vendaEl) {
+            categoriaEl.addEventListener('change', calcularSugestao);
+            compraEl.addEventListener('input', calcularSugestao);
+        }
+    })();
+</script>
+{% endblock %}

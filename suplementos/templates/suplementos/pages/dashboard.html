@@ -1,15 +1,114 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>4R suplementos</title>
-</head>
-<body>
-    
-    {% include "../partials/navbar.html" %}
+{% extends "suplementos/base.html" %}
+{% load static %}
 
-    
+{% block title %}Dashboard — 4R Suplementos{% endblock %}
 
-</body>
-</html>
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:1.5rem;">
+    <div class="stat-tile">
+        <span class="rotulo">Total vendido (bruto)</span>
+        <span class="valor">R$ {{ total_bruto|floatformat:2 }}</span>
+    </div>
+    <div class="stat-tile">
+        <span class="rotulo">Total vendido (líquido)</span>
+        <span class="valor positivo">R$ {{ total_liquido|floatformat:2 }}</span>
+        <span class="rodape">Receita menos custo dos produtos</span>
+    </div>
+    <a href="{% url 'produtos' %}?status=BAIXO" class="stat-tile clicavel">
+        <span class="rotulo">Estoque baixo / esgotado</span>
+        <span class="valor {% if produtos_estoque_baixo.count %}alerta{% endif %}">{{ produtos_estoque_baixo.count }}</span>
+        <span class="rodape">Clique para ver os produtos</span>
+    </a>
+    <a href="{% url 'produtos' %}?vencendo=1" class="stat-tile clicavel">
+        <span class="rotulo">Vencendo em 60 dias</span>
+        <span class="valor {% if produtos_vencendo.count %}alerta{% endif %}">{{ produtos_vencendo.count }}</span>
+        <span class="rodape">Clique para ver os produtos</span>
+    </a>
+</div>
+
+<div class="grid grid-2" style="align-items:start;gap:1.5rem;margin-bottom:1.5rem;">
+    <div class="card">
+        <h3>Vendas por mês</h3>
+        <canvas id="grafico-mensal" height="220"></canvas>
+    </div>
+
+    <div class="card">
+        <h3>Produtos mais vendidos</h3>
+        <div class="tabela-wrap">
+            <table>
+                <thead><tr><th>Produto</th><th>Unidades vendidas</th></tr></thead>
+                <tbody>
+                    {% for item in mais_vendidos %}
+                    <tr>
+                        <td data-rotulo="Produto">{{ item.produto__nome_produto }} {% if item.produto__marca %}({{ item.produto__marca }}){% endif %}</td>
+                        <td data-rotulo="Unidades" class="mono">{{ item.total_vendido }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="vazio">Ainda não há vendas registradas.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Top 5 clientes</h3>
+    <div class="tabela-wrap">
+        <table>
+            <thead><tr><th>Cliente</th><th>Total gasto</th><th></th></tr></thead>
+            <tbody>
+                {% for cliente in top_clientes %}
+                <tr>
+                    <td data-rotulo="Cliente">{{ cliente.nome }}</td>
+                    <td data-rotulo="Total gasto" class="mono">R$ {{ cliente.gasto_total|floatformat:2 }}</td>
+                    <td><a href="{% url 'cliente_detalhe' cliente.id %}" class="btn btn-sm btn-outline">Ver histórico</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="vazio">Ainda não há vendas registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'suplementos/js/chart.umd.min.js' %}"></script>
+{{ labels_mensal|json_script:"labels-mensal" }}
+{{ valores_mensal|json_script:"valores-mensal" }}
+<script>
+    (function () {
+        var labels = JSON.parse(document.getElementById('labels-mensal').textContent);
+        var valores = JSON.parse(document.getElementById('valores-mensal').textContent);
+        var ctx = document.getElementById('grafico-mensal');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Vendido (R$)',
+                    data: valores,
+                    backgroundColor: 'rgba(255, 51, 51, 0.55)',
+                    borderColor: '#ff3333',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }],
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#b3b3b3' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color: '#b3b3b3' } },
+                },
+            },
+        });
+    })();
+</script>
+{% endblock %}

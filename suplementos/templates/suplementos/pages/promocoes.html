@@ -1,0 +1,148 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Promoções — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Promoções</h1>
+</div>
+
+<div class="grid grid-2" style="align-items:start;gap:1.5rem;margin-bottom:1.5rem;">
+    <div class="card">
+        <h3>Produtos perto do vencimento</h3>
+        <p class="texto-secundario">Candidatos naturais a desconto para girar o estoque antes de vencer.</p>
+        <div class="tabela-wrap">
+            <table>
+                <thead><tr><th>Produto</th><th>Validade</th><th>Estoque</th><th>Preço</th></tr></thead>
+                <tbody>
+                    {% for p in produtos_a_vencer %}
+                    <tr>
+                        <td data-rotulo="Produto">{{ p.nome_produto }} {% if p.marca %}({{ p.marca }}){% endif %}</td>
+                        <td data-rotulo="Validade">{{ p.validade }}</td>
+                        <td data-rotulo="Estoque">{{ p.quantidade }}</td>
+                        <td data-rotulo="Preço" class="mono">R$ {{ p.p_venda }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="vazio">Nenhum produto vencendo em breve.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Estoque parado (candidatos a desconto)</h3>
+        <p class="texto-secundario">Produtos com bastante estoque acumulado.</p>
+        <div class="tabela-wrap">
+            <table>
+                <thead><tr><th>Produto</th><th>Estoque</th><th>Margem</th></tr></thead>
+                <tbody>
+                    {% for p in candidatos_desconto %}
+                    <tr>
+                        <td data-rotulo="Produto">{{ p.nome_produto }} {% if p.marca %}({{ p.marca }}){% endif %}</td>
+                        <td data-rotulo="Estoque">{{ p.quantidade }}</td>
+                        <td data-rotulo="Margem">{{ p.margem_lucro|floatformat:0 }}%</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="vazio">Nenhum candidato no momento.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem;">
+    <h3>Sugestões de combo</h3>
+    <p class="texto-secundario">Produto perto do vencimento combinado com um dos mais vendidos de outra categoria.</p>
+    <div class="tabela-wrap">
+        <table>
+            <thead><tr><th>Produto a vencer</th><th>Combinar com</th><th>Preço combo sugerido (-15%)</th></tr></thead>
+            <tbody>
+                {% for s in sugestoes_combo %}
+                <tr>
+                    <td data-rotulo="Produto a vencer">{{ s.produto_vencendo }}</td>
+                    <td data-rotulo="Combinar com">{{ s.parceiro }}</td>
+                    <td data-rotulo="Preço" class="mono">R$ {{ s.preco_combo_sugerido }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="vazio">Sem sugestões no momento.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="grid grid-2" style="align-items:start;gap:1.5rem;">
+    <div class="card">
+        <h3>Promoções cadastradas</h3>
+        <div class="tabela-wrap">
+            <table>
+                <thead><tr><th>Nome</th><th>Tipo</th><th>Período</th><th>Vigente</th><th></th></tr></thead>
+                <tbody>
+                    {% for promo in promocoes %}
+                    <tr>
+                        <td data-rotulo="Nome">{{ promo.nome }}</td>
+                        <td data-rotulo="Tipo">{{ promo.get_tipo_display }}</td>
+                        <td data-rotulo="Período">{{ promo.data_inicio }} — {{ promo.data_fim }}</td>
+                        <td data-rotulo="Vigente">
+                            {% if promo.vigente %}<span class="badge badge-ok">Vigente</span>{% else %}<span class="badge badge-neutro">Inativa</span>{% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'promocao_excluir' promo.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="vazio">Nenhuma promoção cadastrada.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Nova promoção</h3>
+        <form method="post" action="{% url 'promocao_nova' %}">
+            {% csrf_token %}
+            <div class="campo">
+                <label for="{{ form.nome.id_for_label }}">Nome</label>
+                {{ form.nome }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.tipo.id_for_label }}">Tipo</label>
+                {{ form.tipo }}
+            </div>
+            <div class="campo">
+                <label for="{{ form.produtos.id_for_label }}">Produtos incluídos</label>
+                {{ form.produtos }}
+            </div>
+            <div class="grid grid-2">
+                <div class="campo">
+                    <label for="{{ form.percentual_desconto.id_for_label }}">% desconto</label>
+                    {{ form.percentual_desconto }}
+                </div>
+                <div class="campo">
+                    <label for="{{ form.preco_fechado.id_for_label }}">Preço fechado (combo)</label>
+                    {{ form.preco_fechado }}
+                </div>
+                <div class="campo">
+                    <label for="{{ form.data_inicio.id_for_label }}">Início</label>
+                    {{ form.data_inicio }}
+                </div>
+                <div class="campo">
+                    <label for="{{ form.data_fim.id_for_label }}">Fim</label>
+                    {{ form.data_fim }}
+                </div>
+            </div>
+            <div class="campo">
+                <label for="{{ form.observacoes.id_for_label }}">Observações</label>
+                {{ form.observacoes }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Criar promoção</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

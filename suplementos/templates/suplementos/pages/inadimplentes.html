@@ -1,0 +1,45 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Inadimplentes — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Inadimplentes</h1>
+        <p class="subtitulo">Vendas fiado ainda não pagas</p>
+    </div>
+    <div class="stat-tile" style="min-width:200px;">
+        <span class="rotulo">Total em aberto</span>
+        <span class="valor critico">R$ {{ total_em_aberto|floatformat:2 }}</span>
+    </div>
+</div>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>Cliente</th><th>Data</th><th>Produtos</th><th>Valor</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for v in vendas %}
+            <tr>
+                <td data-rotulo="Cliente"><a href="{% url 'cliente_detalhe' v.cliente.id %}">{{ v.cliente.nome }}</a></td>
+                <td data-rotulo="Data">{{ v.data }}</td>
+                <td data-rotulo="Produtos">
+                    {% for item in v.itens.all %}{{ item.quantidade }}x {{ item.nome_produto_snapshot }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="texto-fraco">{{ v.observacoes|truncatechars:60 }}</span>{% endfor %}
+                </td>
+                <td data-rotulo="Valor" class="mono">R$ {{ v.total|floatformat:2 }}</td>
+                <td>
+                    <form method="post" action="{% url 'inadimplente_pagar' v.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-primary">Marcar como pago</button>
+                    </form>
+                    <a href="{% url 'venda_detalhe' v.id %}" class="btn btn-sm btn-outline">Detalhes</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="vazio">Nenhum inadimplente no momento.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

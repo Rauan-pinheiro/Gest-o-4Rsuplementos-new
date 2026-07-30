@@ -1,0 +1,72 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Validades — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Controle de validade</h1>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem;">
+    <h3>Vencidos</h3>
+    <div class="tabela-wrap">
+        <table>
+            <thead><tr><th>Produto</th><th>Local</th><th>Estoque</th><th>Venceu em</th></tr></thead>
+            <tbody>
+                {% for p in vencidos %}
+                <tr>
+                    <td data-rotulo="Produto">{{ p.nome_produto }} {% if p.marca %}({{ p.marca }}){% endif %}</td>
+                    <td data-rotulo="Local">{{ p.local.nome_local|default:"—" }}</td>
+                    <td data-rotulo="Estoque">{{ p.quantidade }}</td>
+                    <td data-rotulo="Venceu em"><span class="badge badge-esgotado">{{ p.validade }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="vazio">Nenhum produto vencido.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem;">
+    <h3>Vencendo nos próximos 90 dias</h3>
+    <div class="tabela-wrap">
+        <table>
+            <thead><tr><th>Produto</th><th>Local</th><th>Estoque</th><th>Validade</th></tr></thead>
+            <tbody>
+                {% for p in proximos %}
+                <tr>
+                    <td data-rotulo="Produto">{{ p.nome_produto }} {% if p.marca %}({{ p.marca }}){% endif %}</td>
+                    <td data-rotulo="Local">{{ p.local.nome_local|default:"—" }}</td>
+                    <td data-rotulo="Estoque">{{ p.quantidade }}</td>
+                    <td data-rotulo="Validade"><span class="badge badge-baixo">{{ p.validade }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="vazio">Nenhum produto vencendo em breve.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Demais produtos com validade cadastrada</h3>
+    <div class="tabela-wrap">
+        <table>
+            <thead><tr><th>Produto</th><th>Local</th><th>Estoque</th><th>Validade</th></tr></thead>
+            <tbody>
+                {% for p in demais %}
+                <tr>
+                    <td data-rotulo="Produto">{{ p.nome_produto }} {% if p.marca %}({{ p.marca }}){% endif %}</td>
+                    <td data-rotulo="Local">{{ p.local.nome_local|default:"—" }}</td>
+                    <td data-rotulo="Estoque">{{ p.quantidade }}</td>
+                    <td data-rotulo="Validade">{{ p.validade }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="vazio">—</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Orçamentos — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Orçamentos</h1>
+    <a href="{% url 'orcamento' %}" class="btn btn-primary">+ Novo orçamento</a>
+</div>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr><th>#</th><th>Cliente</th><th>Data</th><th>Válido até</th><th>Total</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for o in orcamentos %}
+            <tr>
+                <td data-rotulo="#">{{ o.id }}</td>
+                <td data-rotulo="Cliente">{{ o.nome_cliente|default:"—" }}</td>
+                <td data-rotulo="Data">{{ o.data }}</td>
+                <td data-rotulo="Válido até">{{ o.validade_orcamento|default:"—" }}</td>
+                <td data-rotulo="Total" class="mono">R$ {{ o.total|floatformat:2 }}</td>
+                <td data-rotulo="Status">
+                    <span class="badge {% if o.status == 'CONVERTIDO' %}badge-ok{% elif o.status == 'EXPIRADO' %}badge-esgotado{% else %}badge-neutro{% endif %}">
+                        {{ o.get_status_display }}
+                    </span>
+                </td>
+                <td><a href="{% url 'orcamento_detalhe' o.id %}" class="btn btn-sm btn-outline">Ver</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="vazio">Nenhum orçamento gerado ainda.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

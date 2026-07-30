@@ -2,7 +2,6 @@
 
 <link rel="stylesheet" href="{% static 'suplementos/css/navbar.css' %}">
 
-
 <nav class="main-navbar">
 
     <div class="navbar-container">
@@ -13,17 +12,40 @@
             </a>
         </div>
 
-        <ul class="pages">
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'historico' %}">Histórico</a></li>
-            <li><a href="{% url 'inadimplentes' %}">Inadimplentes</a></li>
-            <li><a href="{% url 'orcamento' %}">Orçamento</a></li>
-            <li><a href="{% url 'produtos' %}">Produtos</a></li>
-            <li><a href="{% url 'promocoes' %}">Promoções</a></li>
-            <li><a href="{% url 'validades' %}">Validades</a></li>
-            <li><a href="{% url 'vendas' %}">Vendas</a></li>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+
+        <ul class="pages" id="nav-pages">
+            <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}ativo{% endif %}">Dashboard</a></li>
+            <li><a href="{% url 'produtos' %}" class="{% if request.resolver_match.url_name == 'produtos' %}ativo{% endif %}">Produtos</a></li>
+            <li><a href="{% url 'vendas' %}" class="{% if request.resolver_match.url_name == 'vendas' %}ativo{% endif %}">Vendas</a></li>
+            <li><a href="{% url 'orcamento' %}" class="{% if request.resolver_match.url_name == 'orcamento' %}ativo{% endif %}">Orçamento</a></li>
+            <li><a href="{% url 'inadimplentes' %}" class="{% if request.resolver_match.url_name == 'inadimplentes' %}ativo{% endif %}">Inadimplentes</a></li>
+            <li><a href="{% url 'promocoes' %}" class="{% if request.resolver_match.url_name == 'promocoes' %}ativo{% endif %}">Promoções</a></li>
+            <li><a href="{% url 'validades' %}" class="{% if request.resolver_match.url_name == 'validades' %}ativo{% endif %}">Validades</a></li>
+            <li><a href="{% url 'historico' %}" class="{% if request.resolver_match.url_name == 'historico' %}ativo{% endif %}">Histórico</a></li>
         </ul>
+
+        <div class="navbar-user">
+            <form action="{% url 'logout' %}" method="post" style="margin:0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-sair">Sair</button>
+            </form>
+        </div>
 
     </div>
 
 </nav>
+
+<script>
+    (function () {
+        var toggle = document.getElementById('nav-toggle');
+        var pages = document.getElementById('nav-pages');
+        if (!toggle || !pages) return;
+        toggle.addEventListener('click', function () {
+            var aberto = pages.classList.toggle('aberto');
+            toggle.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        });
+    })();
+</script>

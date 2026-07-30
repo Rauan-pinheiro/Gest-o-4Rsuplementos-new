@@ -1,0 +1,81 @@
+{% extends "suplementos/base.html" %}
+{% load static %}
+
+{% block title %}Lançar venda — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Lançar venda</h1>
+    <a href="{% url 'historico' %}" class="btn btn-outline">Ver histórico de vendas</a>
+</div>
+
+{{ produtos_json|json_script:"produtos-data" }}
+
+<form method="post" id="carrinho-form" class="grid grid-2" style="align-items:start;gap:1.5rem;">
+    {% csrf_token %}
+    <input type="hidden" name="itens_json" id="itens_json" value="[]">
+
+    <div class="card">
+        <h3>Dados da venda</h3>
+        <div class="campo">
+            <label for="cliente_nome">Cliente</label>
+            <input type="text" name="cliente_nome" id="cliente_nome" list="lista-clientes" placeholder="Nome do cliente" required>
+            <datalist id="lista-clientes">
+                {% for c in clientes %}<option value="{{ c.nome }}">{% endfor %}
+            </datalist>
+        </div>
+        <div class="campo">
+            <label for="local">Local da venda</label>
+            <select name="local" id="local">
+                <option value="">—</option>
+                {% for l in locais %}<option value="{{ l.id }}">{{ l.nome_local }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="forma_pagamento">Forma de pagamento</label>
+            <select name="forma_pagamento" id="forma_pagamento">
+                {% for valor, rotulo in forma_pagamento_choices %}
+                    <option value="{{ valor }}">{{ rotulo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="campo">
+            <label for="data">Data</label>
+            <input type="date" name="data" id="data" value="{{ hoje }}">
+        </div>
+        <div class="campo">
+            <label for="observacoes">Observações</label>
+            <textarea name="observacoes" id="observacoes" rows="2"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Registrar venda</button>
+    </div>
+
+    <div class="card">
+        <h3>Produtos</h3>
+        <div class="campo busca-produto-wrap">
+            <label for="produto-busca">Buscar produto no estoque</label>
+            <input type="search" id="produto-busca" placeholder="Digite o nome, marca ou variação..." autocomplete="off">
+            <div id="produto-sugestoes" class="produto-sugestoes"></div>
+        </div>
+
+        <div class="tabela-wrap">
+            <table>
+                <thead>
+                    <tr><th>Produto</th><th>Qtd</th><th>Preço unit.</th><th>Subtotal</th><th></th></tr>
+                </thead>
+                <tbody id="carrinho-corpo"></tbody>
+            </table>
+        </div>
+
+        <div class="page-header" style="margin-top:1rem;margin-bottom:0;">
+            <span class="texto-secundario">Total</span>
+            <strong id="carrinho-total" style="font-size:1.4rem;">R$ 0,00</strong>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'suplementos/js/carrinho.js' %}"></script>
+{% endblock %}

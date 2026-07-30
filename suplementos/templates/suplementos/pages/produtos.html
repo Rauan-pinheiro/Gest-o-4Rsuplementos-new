@@ -1,0 +1,117 @@
+{% extends "suplementos/base.html" %}
+
+{% block title %}Produtos — 4R Suplementos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Estoque de produtos</h1>
+        <p class="subtitulo">{{ page_obj.paginator.count|default:produtos|length }} produto(s) cadastrado(s)</p>
+    </div>
+    <a href="{% url 'produto_novo' %}" class="btn btn-primary">+ Novo produto</a>
+</div>
+
+<form method="get" class="toolbar card">
+    <div class="campo">
+        <label for="q">Buscar</label>
+        <input type="search" name="q" id="q" placeholder="Nome, marca ou variação" value="{{ filtros.q|default:'' }}">
+    </div>
+    <div class="campo">
+        <label for="categoria">Categoria</label>
+        <select name="categoria" id="categoria">
+            <option value="">Todas</option>
+            {% for c in categorias %}
+                <option value="{{ c.id }}" {% if filtros.categoria == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="campo">
+        <label for="local">Local</label>
+        <select name="local" id="local">
+            <option value="">Todos</option>
+            {% for l in locais %}
+                <option value="{{ l.id }}" {% if filtros.local == l.id|stringformat:"s" %}selected{% endif %}>{{ l.nome_local }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="campo">
+        <label for="status">Status</label>
+        <select name="status" id="status">
+            <option value="">Todos</option>
+            <option value="OK" {% if filtros.status == "OK" %}selected{% endif %}>Ok</option>
+            <option value="BAIXO" {% if filtros.status == "BAIXO" %}selected{% endif %}>Baixo</option>
+            <option value="ESGOTADO" {% if filtros.status == "ESGOTADO" %}selected{% endif %}>Esgotado</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-outline">Filtrar</button>
+    <a href="{% url 'produtos' %}" class="btn btn-outline">Limpar</a>
+</form>
+
+<div class="tabela-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Local</th>
+                <th>Estoque</th>
+                <th>Compra</th>
+                <th>Venda</th>
+                <th>Margem</th>
+                <th>Validade</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in produtos %}
+            <tr>
+                <td>
+                    {% if p.imagem %}
+                        <img src="{{ p.imagem.url }}" class="tabela-produto-img" alt="">
+                    {% else %}
+                        <div class="tabela-produto-img"></div>
+                    {% endif %}
+                </td>
+                <td data-rotulo="Produto">
+                    <strong>{{ p.nome_produto }}</strong><br>
+                    <span class="texto-secundario">{{ p.marca }}{% if p.variacao %} — {{ p.variacao }}{% endif %}</span>
+                </td>
+                <td data-rotulo="Categoria">
+                    {% if p.categoria %}
+                        <a href="{% url 'produtos_comparar' p.categoria.id %}">{{ p.categoria.nome }}</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td data-rotulo="Local">{{ p.local.nome_local|default:"—" }}</td>
+                <td data-rotulo="Estoque" class="mono">{{ p.quantidade }} <span class="texto-fraco">(mín. {{ p.quantidade_minima }})</span></td>
+                <td data-rotulo="Compra" class="mono">R$ {{ p.p_compra }}</td>
+                <td data-rotulo="Venda" class="mono">R$ {{ p.p_venda }}</td>
+                <td data-rotulo="Margem" class="mono">{{ p.margem_lucro|floatformat:0 }}%</td>
+                <td data-rotulo="Validade">{{ p.validade|default:"—" }}</td>
+                <td data-rotulo="Status">
+                    <span class="badge badge-{{ p.status|lower }}">{{ p.get_status_display }}</span>
+                </td>
+                <td>
+                    <a href="{% url 'produto_editar' p.id %}" class="btn btn-sm btn-outline">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="11" class="vazio">Nenhum produto encontrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div class="toolbar" style="margin-top:1.25rem;">
+    {% if page_obj.has_previous %}
+        <a class="btn btn-sm btn-outline" href="?page={{ page_obj.previous_page_number }}">← Anterior</a>
+    {% endif %}
+    <span class="texto-secundario">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a class="btn btn-sm btn-outline" href="?page={{ page_obj.next_page_number }}">Próxima →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
