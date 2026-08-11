@@ -19,7 +19,6 @@ services:
       - .env
     volumes:
       - .:/app
-      - media_data:/app/media
     depends_on:
       db:
         condition: service_healthy
@@ -43,6 +42,5 @@ services:
 
 volumes:
   postgres_data:
-  media_data:
   caddy_data:
   caddy_config:

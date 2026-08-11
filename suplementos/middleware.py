@@ -16,8 +16,10 @@ class RequireLoginMiddleware:
     def __call__(self, request):
         path = request.path
 
-        exempt = path.startswith(reverse('login')) or any(
-            path.startswith('/' + prefix.lstrip('/')) for prefix in EXEMPT_PREFIXES
+        exempt = (
+            path.startswith(reverse('login'))
+            or path == reverse('healthz')
+            or any(path.startswith('/' + prefix.lstrip('/')) for prefix in EXEMPT_PREFIXES)
         )
 
         if not exempt and not request.user.is_authenticated:

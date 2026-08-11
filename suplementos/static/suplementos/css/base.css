@@ -169,7 +169,6 @@ thead th {
 }
 tbody td { padding: 0.75rem 1rem; border-top: 1px solid var(--borda); vertical-align: middle; }
 tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
-.tabela-produto-img { width: 40px; height: 40px; object-fit: cover; border-radius: var(--radius-sm); background: var(--bg-elevado); }
 
 /* ===== Badges / status ===== */
 .badge {

@@ -51,7 +51,6 @@ class Produto(models.Model):
         Local, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='produtos', verbose_name='Local de Armazenamento'
     )
-    imagem = models.ImageField(upload_to='produtos/', null=True, blank=True, verbose_name="Imagem")
 
     quantidade = models.IntegerField(default=0, verbose_name="Quantidade")
     quantidade_minima = models.IntegerField(default=1, verbose_name="Quantidade mínima (alerta de estoque baixo)")

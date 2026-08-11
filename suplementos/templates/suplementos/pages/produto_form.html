@@ -9,7 +9,7 @@
 </div>
 
 <div class="card" style="max-width:720px;">
-    <form method="post" enctype="multipart/form-data">
+    <form method="post">
         {% csrf_token %}
 
         <div class="grid grid-2">
@@ -32,13 +32,6 @@
             <div class="campo">
                 <label for="{{ form.local.id_for_label }}">Local de armazenamento</label>
                 {{ form.local }}
-            </div>
-            <div class="campo">
-                <label for="{{ form.imagem.id_for_label }}">Imagem</label>
-                {{ form.imagem }}
-                {% if object.imagem %}
-                    <img src="{{ object.imagem.url }}" class="tabela-produto-img" style="margin-top:0.5rem;width:64px;height:64px;" alt="">
-                {% endif %}
             </div>
             <div class="campo">
                 <label for="{{ form.quantidade.id_for_label }}">Quantidade em estoque</label>

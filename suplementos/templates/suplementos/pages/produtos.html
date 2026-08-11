@@ -51,7 +51,6 @@
     <table>
         <thead>
             <tr>
-                <th></th>
                 <th>Produto</th>
                 <th>Categoria</th>
                 <th>Local</th>
@@ -67,13 +66,6 @@
         <tbody>
             {% for p in produtos %}
             <tr>
-                <td>
-                    {% if p.imagem %}
-                        <img src="{{ p.imagem.url }}" class="tabela-produto-img" alt="">
-                    {% else %}
-                        <div class="tabela-produto-img"></div>
-                    {% endif %}
-                </td>
                 <td data-rotulo="Produto">
                     <strong>{{ p.nome_produto }}</strong><br>
                     <span class="texto-secundario">{{ p.marca }}{% if p.variacao %} — {{ p.variacao }}{% endif %}</span>
@@ -97,7 +89,7 @@
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="11" class="vazio">Nenhum produto encontrado.</td></tr>
+            <tr><td colspan="10" class="vazio">Nenhum produto encontrado.</td></tr>
             {% endfor %}
         </tbody>
     </table>

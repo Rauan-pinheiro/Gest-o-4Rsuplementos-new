@@ -109,12 +109,10 @@ O projeto **já vem pronto para um VPS com Docker**: `docker-compose.yml` sobe t
 - **Hetzner Cloud**: melhor custo-benefício (planos a partir de ~€4/mês), servidores na Europa/EUA. Ótimo se não precisar de baixa latência específica pro Brasil.
 - **DigitalOcean**: um pouco mais caro, mas tem datacenter em São Paulo (menor latência para usuários no Brasil) e documentação/suporte mais simples para quem está começando com VPS.
 
-Por que não uma PaaS (Render, Railway, Fly.io)?
-- Essas plataformas já cuidam de TLS e proxy por conta própria — o `Caddyfile` e a parte de certificado ficariam redundantes ou incompatíveis, exigindo adaptar o compose.
-- O volume `media_data` (upload de imagens de produto) precisa de disco persistente; em muitas PaaS isso exige um add-on pago separado, enquanto num VPS é só um volume Docker normal.
+Por que VPS em vez de uma PaaS (Render, Railway, Fly.io)?
 - Para um sistema pequeno de uso interno como este, um VPS de ~$4–6/mês com Docker Compose é mais barato e mais previsível do que os planos pagos dessas PaaS.
 
-Se no futuro o tráfego crescer bastante ou você quiser deploy sem gerenciar servidor, Railway é a migração mais tranquila (suporta Docker Compose-like setups e Postgres gerenciado).
+Dito isso, o projeto **também está pronto para deploy na Railway** (ver seção 6) — é a opção mais simples se você preferir não gerenciar servidor.
 
 ### Passo a passo do deploy num VPS (Ubuntu, Docker)
 
@@ -147,14 +145,47 @@ Se no futuro o tráfego crescer bastante ou você quiser deploy sem gerenciar se
 
 ---
 
-## 6. Deploy gratuito (opção alternativa)
+## 6. Deploy na Railway
+
+O projeto está preparado para deploy direto na [Railway](https://railway.com/) sem precisar do `docker-compose.yml`/Caddy — a Railway já cuida de HTTPS, domínio e porta dinâmica sozinha. O `Dockerfile` existente é usado como está (a Railway detecta e builda ele automaticamente); `railway.json` define o healthcheck (`/healthz/`).
+
+### Passo a passo
+
+1. **Criar o projeto na Railway** a partir do repositório Git (GitHub).
+2. **Adicionar um banco PostgreSQL** ao projeto (botão "New" → "Database" → "PostgreSQL"). A Railway cria a variável `DATABASE_URL` automaticamente — o `config/settings.py` já detecta e usa essa variável quando presente (ver seção de banco de dados).
+3. **Conectar o Postgres ao serviço web**: na aba "Variables" do serviço web, referencie `DATABASE_URL` do Postgres (a Railway sugere isso automaticamente ao ligar os dois serviços).
+4. **Definir as variáveis de ambiente do serviço web** (aba "Variables"):
+   - `DJANGO_SECRET_KEY` — gere uma nova, nunca reaproveite a de dev.
+   - `DJANGO_DEBUG=False`
+   - `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` — normalmente nem precisa definir: o projeto detecta `RAILWAY_PUBLIC_DOMAIN` (injetada automaticamente pela Railway) e libera esse domínio sozinho. Só defina essas duas se for usar um domínio próprio além do `*.up.railway.app`.
+   - `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD` — credenciais do único usuário do sistema.
+   - Não defina `PORT` — a Railway injeta essa variável sozinha, e o `entrypoint.sh` já usa `$PORT` automaticamente.
+5. **Gerar o domínio público** do serviço web (aba "Settings" → "Networking" → "Generate Domain").
+6. **Deploy**: a Railway builda a imagem, e o `entrypoint.sh` roda `migrate`, `collectstatic` e cria o superusuário automaticamente a cada deploy — igual ao fluxo do VPS.
+7. **Testar**: acesse a URL gerada (`/` → login) e `/admin/`.
+8. **(Opcional) Importar dados legados**: rode `python manage.py importar_backups` pelo shell da Railway (aba do serviço → "..." → "Run command", ou via CLI `railway run python manage.py importar_backups`).
+
+O projeto não usa upload de arquivos (não há campo de imagem em nenhum model), então não depende de disco persistente — funciona no filesystem efêmero padrão de qualquer serviço Railway, sem Volume nem storage externo.
+
+### Checklist antes do deploy na Railway
+
+- [ ] Serviço PostgreSQL adicionado e `DATABASE_URL` conectada ao serviço web
+- [ ] `DJANGO_SECRET_KEY`, `DJANGO_SUPERUSER_PASSWORD` de produção definidos (diferentes dos de dev)
+- [ ] `DJANGO_DEBUG=False`
+- [ ] Domínio público gerado na aba Networking
+- [ ] `.env` não commitado no git (confirmado no `.gitignore`)
+
+---
+
+## 7. Deploy gratuito (opção alternativa — Render + Neon)
 
 Também é possível colocar o sistema no ar sem custo, mas exige adaptar a arquitetura atual: o `docker-compose.yml` (Postgres + Caddy) foi pensado para VPS, e tiers gratuitos de PaaS normalmente não dão banco Postgres persistente nem disco persistente de graça.
 
 **Combinação sugerida:**
 - **App Django**: [Render](https://render.com) free tier (roda o `gunicorn`; "dorme" após ~15 min sem uso, com cold start de 30–50s no primeiro acesso; filesystem efêmero).
 - **Banco de dados**: [Neon](https://neon.tech) free tier (Postgres serverless persistente).
-- **Imagens (media)**: storage externo (Cloudinary free tier ou Supabase Storage), já que o disco do Render free some a cada deploy.
+
+Como o projeto não depende de disco persistente (sem upload de arquivos), o filesystem efêmero do Render free não é um problema aqui.
 
 Essa opção é razoável para um sistema interno pequeno como este — o principal incômodo do dia a dia é o cold start do plano free.
 
@@ -164,10 +195,8 @@ Essa opção é razoável para um sistema interno pequeno como este — o princi
 - [ ] Criar banco no Neon e copiar as credenciais (host, porta, usuário, senha, nome do banco)
 - [ ] Remover o serviço `db` do `docker-compose.yml` (ou não usar compose no Render) e apontar `POSTGRES_HOST`/`POSTGRES_PORT`/`POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` no `.env` para o Neon
 - [ ] Remover/ajustar o Caddy (Render já cuida de HTTPS e domínio automaticamente) — o `Caddyfile` deixa de ser necessário nesse cenário
-- [ ] Configurar `django-storages` (ou equivalente) para enviar uploads de imagem ao Cloudinary/Supabase Storage em vez do volume local `media_data`
 - [ ] Atualizar `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` para o domínio `.onrender.com` (ou domínio próprio, se configurado no Render)
 - [ ] Definir `DJANGO_SECRET_KEY`, `POSTGRES_PASSWORD` e `DJANGO_SUPERUSER_PASSWORD` de produção (diferentes dos de dev)
 - [ ] Definir `DJANGO_DEBUG=False`
 - [ ] Rodar `migrate` e criar o superusuário no primeiro deploy (via shell do Render ou build command)
-- [ ] Testar login, upload de imagem de produto e persistência após um redeploy (para confirmar que o storage externo está funcionando)
 - [ ] Avaliar o limite de inatividade do Neon free (pode pausar o banco após período sem uso) e o cold start do Render free antes de considerar essa opção para uso com usuários externos
